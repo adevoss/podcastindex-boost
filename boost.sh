@@ -8,25 +8,29 @@
 
 LNCLI="/usr/local/bin/lncli"
 APP_NAME="lncli"
-SENDER="Arno"
 
-if [ $# == 10 ]; then
+if [ $# == 12 ]; then
 
-PODCASTTITLE=$1
-EPISODETITLE=$2
-TIMESTAMP=$3
-FEEDID=$4
-FEEDGUID=$5
-FEEDURL=$6
-RECIPIENT=$7
-NODEID=$8
-MESSAGE=$9
-SATS=${10}
+MODE=$1
+UNLOCKED=$2
+PODCASTTITLE=$3
+EPISODETITLE=$4
+TIMESTAMP=$5
+FEEDID=$6
+FEEDURL=$7
+RECIPIENT=$8
+NODEID=$9
+MESSAGE=${10}
+SENDER=${11}
+SATS=${12}
 
 TIME=$(date +%H:%M)
 MSATS=$((SATS*1000))
 
-$LNCLI unlock
+# If automatic unlock is not set on node then you can only send boosts manually by using boost.sh
+if [ $MODE == "SEND" -a $UNLOCKED == 0 ]; then
+   $LNCLI unlock
+fi
 
 DATA="{"
 DATA="$DATA\"action\": \"boost\", "
@@ -46,14 +50,33 @@ DATA="$DATA}"
 #RECORD=`echo -n $DATA | xxd -pu -c 10000`
 RECORD=`echo $DATA |  od -A n -t x1 | sed -z 's/[ \n]*//g'`
 
-#echo "Testing..."
-#echo $NODEID
-#echo
-#echo $DATA
-#echo
-#echo $RECORD
-$LNCLI sendpayment --dest=$NODEID --amt=$SATS --keysend --data 7629169=$RECORD
+if [ $MODE == "TEST" ]; then
+   echo $MODE 
+   echo
+   echo $NODEID
+   echo $PODCASTTITLE
+   echo $EPISODETITLE
+   echo $TIMESTAMP
+   echo $FEEDID
+   echo $FEEDURL
+   echo $RECIPIENT
+   echo $NODEID
+   echo $MESSAGE
+   echo $SENDER
+   echo $SATS
+   echo
+   echo $DATA
+   echo
+   echo $RECORD
+fi
+if [ $MODE == "SEND" ]; then
+   if [ -f $LNCLI ]; then
+      $LNCLI sendpayment --dest=$NODEID --amt=$SATS --keysend --data 7629169=$RECORD
+   else
+      echo "$LNCLI does not exist and/or is not executable."
+   fi
+fi
 
 else
-   echo "Usage: $0 <podcast title> <episode title> <timestamp in seconds> <feed url> <node id> <sender name> <message> <amount in sats>"
-fi
+   echo "Usage: $0 <mode [TEST|SEND]> <podcast title> <episode title> <timestamp in seconds> <feed id> <feed url> <recipient> <node id> <message> <sender name> <amount in sats>"
+fi # number of arguments

@@ -1,0 +1,21 @@
+{
+    "podcastindex":{
+        "url":"https://api.podcastindex.org/api/1.0/",
+        "key":"xxxxxxxxxxxxxxxxxxxxxxxxx",
+        "secret":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    "directory":{
+        "log":"/var/log/podcastindex"
+    },
+    "settings":{
+        "mode":"TEST",
+        "timestamp":"1",
+        "message":"Boost!",
+        "sender":"<name>",
+        "sats_total":"1000"
+    },
+    "file":{
+        "podcastlist":"podcastlist.json",
+        "sendboostagram":"./boost.sh"
+    }
+}
