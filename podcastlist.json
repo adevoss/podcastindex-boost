@@ -1,0 +1,11 @@
+{
+    "podcastlist": [
+        {
+            "id": "920666",
+            "boostable": "1",
+            "feed": "http://mp3s.nashownotes.com/pc20rss.xml",
+            "title": "Podcasting20",
+            "directory": "Tech"
+        }
+    ]
+}
