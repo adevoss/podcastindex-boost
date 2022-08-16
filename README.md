@@ -1,4 +1,4 @@
-# podcastindex-aggregator
+# podcastindex-boost
 Send a boostagram to a podcasts using the Podcast Index (https://podcastindex.org)
 
 To use you need a key. Please go to https://api.podcastindex.org/signup
