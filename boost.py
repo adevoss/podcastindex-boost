@@ -23,7 +23,8 @@ def podcast_value(feedId, log_path):
     PIurl = configuration.config["podcastindex"]["url"]
     url = PIurl + "value/byfeedid?id=" + str(feedId) + "&pretty"
     result = PIfunctions.request(url, log_path)
-    value = result['value']['destinations']
+    if result !=None:
+       value = result['value']['destinations']
     return value
 
 def episodesdata(feedId, log_path):
@@ -43,10 +44,12 @@ def episodedata(feedId, episode_nr, log_path):
 
 def episode_value(episode, log_path):
     value = None
-    if episode != None:
-       value = episode['value']['destinations']
-    else:
+    if episode == None:
        value = podcast_value(feedId, log_path)
+    else:
+       value = episode['value']['destinations']
+       if value == None:
+          value = podcast_value(feedId, log_path)
     return value
 
 def process_file(mode, data, episodes_nr, podcast_to_process, timestamp, sats_total, boostagrammessage, podcastlist_file, log_path):
