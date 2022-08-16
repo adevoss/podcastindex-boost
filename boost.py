@@ -133,7 +133,7 @@ try:
         podcast_to_process = "--help"
 
     if str(podcast_to_process) == "-h" or podcast_to_process == "--help":
-       print ('Usage: ' + sys.argv[0] + ' VALUE|BOOST <podcastindex-id> <episode nr> [<timestamp> <sats_total> <message>]')
+       print ('Usage: ' + sys.argv[0] + ' VALUE|BOOST <podcastindex-id> <episode_nr> [<timestamp> <sender> <sats_total> <message>]')
 
 except Exception as e:
     message = e
