@@ -4,7 +4,7 @@ Send a boostagram to a podcasts using the Podcast Index (https://podcastindex.or
 To use you need a key. Please go to https://api.podcastindex.org/signup
 
 Example:
-/path/to/boost.py 920666 90 1 1000 'Boostmessage'
+sudo -u helipad python3 BOOST /path/to/boost.py 920666 90 1 'Sender' 1000 'Boostmessage'
 
 Options:
 /path/to/boost.py VALUE|BOOST <podcastindex-id> <episode_nr> [<timestamp> <sender> <sats_total> <message>]
@@ -25,3 +25,24 @@ configuration.json:
 
 - podcastlist: file containing your podcastlist
 - sendboostagram: path to boost.sh
+
+
+INSTALLATION on Raspiblitz v1.8:
+
+Install extra package:
+- sudo apt install python3-dateutil
+
+Get files:
+- cd /tmp
+- sudo git clone https://github.com/adevoss/podcastindex-boost
+- copy \*.sh, \*.py and \*.json to a directory of choice
+- copy LICENCE and README.md to the same directory of choice
+- sudo rm -rf /tmp/podcastindex-boost
+- sudo chown -Rv helipad:helipad <directory of choice>
+- sudo mkdir <log-directory> (see config.json)
+- sudo chown -Rv helipad:helipad <log-directory>
+
+Configuration:
+- edit paths in configuration.py and config.json
+- edit settings in config.json
+- edit podcastlist.json
