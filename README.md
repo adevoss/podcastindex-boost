@@ -9,6 +9,7 @@ sudo -u helipad python3 BOOST /path/to/boost.py 920666 90 1 'Sender name' 1000 '
 
 Options:
 /path/to/boost.py VALUE|BOOST <podcastindex-id> <episode_nr> [<timestamp> <sender> <sats_total> <message>]
+Use 0 as episode_nr to boost the podcast instead of a specific episode (i.e a live podcast)
 
 VALUE - Show valueblock of podcast episode
 BOOST - Send boostagram
