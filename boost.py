@@ -66,11 +66,12 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
                  if pi_episode != None:
                     episode_in_index = True
 
-                 if episode_in_index:
+                 if episode_nr == 0 or episode_in_index:
                     if valueblock != None:
                        logged_boostagrammessage = 0
                        print('Podcast: ' + pi_podcast["feed"]['title'])
-                       print('Episode: ' + pi_episode['title'])
+                       if int(episode_nr) > 0:
+                          print('Episode: ' + pi_episode['title'])
 
                        if mode == "BOOST":
                            print('Boostagram: ' + boostagrammessage)
@@ -81,7 +82,8 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
                                      logged_boostagrammessage = 1
                                      if mode == "BOOST":
                                         generalfunctions.log(log_path, 'Podcast: ' + pi_podcast["feed"]['title'], False, False)
-                                        generalfunctions.log(log_path, 'Episode: ' + pi_episode['title'], False, False)
+                                        if int(episode_nr) > 0:
+                                           generalfunctions.log(log_path, 'Episode: ' + pi_episode['title'], False, False)
                                         generalfunctions.log(log_path, 'Timestamp: ' + str(timestamp), False, False)
                                         generalfunctions.log(log_path, 'Sender: ' + sender, False, False)
                                         generalfunctions.log(log_path, 'sats: ' + str(sats_total), False, False)
@@ -104,21 +106,23 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
                                      print('Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%')
                     else:
                        message = 'Podcast: ' + pi_podcast["feed"]['title']
-                       generalfunctions.log(log_path, message, True, False)
+                       generalfunctions.log(log_path, message, False, False)
                        print(message)
-                       message = 'Episode: ' + pi_episode['title']
-                       generalfunctions.log(log_path, message, True, False)
-                       print(message)
-                       message = 'No value block in index'
-                       generalfunctions.log(log_path, message, True, False)
+                       if int(episode_nr) > 0:
+                          message = 'Episode: ' + pi_episode['title']
+                          generalfunctions.log(log_path, message, False, False)
+                          print(message)
+                       message = 'No valueblock in index'
+                       generalfunctions.log(log_path, message, False, False)
                        print(message)
                  else:
-                    message = 'Podcast: ' + pi_podcast["feed"]['title']
-                    generalfunctions.log(log_path, message, True, False)
-                    print(message)
-                    message = 'Episode ' + str(episode_nr) + ' not in index'
-                    generalfunctions.log(log_path, message, True, False)
-                    print(message)
+                    if int(episode_nr) > 0:
+                       message = 'Podcast: ' + pi_podcast["feed"]['title']
+                       generalfunctions.log(log_path, message, True, False)
+                       print(message)
+                       message = 'Episode ' + str(episode_nr) + ' not in index'
+                       generalfunctions.log(log_path, message, True, False)
+                       print(message)
               else:
                  if mode == "BOOST":
                     message = 'Podcast \'' + podcast_data["title"] + '\'' + 'is set in your configuration to be not boostable'
