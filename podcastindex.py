@@ -18,13 +18,23 @@ def podcastdata(feedId, log_path):
     feed_result = PIfunctions.request(url, log_path)
     return feed_result
 
+def nodesdata(data):
+    value = None
+    if data !=None:
+        if 'value' in data and 'model' in data['value'] and 'destinations' in data['value']:
+          if 'type' in data['value']['model'] and 'method' in data['value']['model']:
+             if data['value']['model']['type'] == 'lightning':
+                if data['value']['model']['method'] == 'keysend':
+                   value = data['value']['destinations']
+    return value
+
 def podcast_value(feedId, log_path):
     value = None
     PIurl = configuration.config["podcastindex"]["url"]
     url = PIurl + "value/byfeedid?id=" + str(feedId) + "&pretty"
     result = PIfunctions.request(url, log_path)
     if result !=None:
-       value = result['value']['destinations']
+        value = nodesdata(result)
     return value
 
 def episodesdata(feedId, log_path):
@@ -36,20 +46,26 @@ def episodesdata(feedId, log_path):
 
 def episodedata(feedId, episode_nr, log_path):
     value = None
-    episodes_result = episodesdata(feedId, log_path)
-    for episode in episodes_result['items']:
-        if episode['episode'] == str(episode_nr) or str(episode_nr) in episode['title']:
-           value = episode
+    match = False
+    if int(episode_nr) > 0:
+       episodes_result = episodesdata(feedId, log_path)
+       for episode in episodes_result['items']:
+           if episode['episode'] == str(episode_nr):
+               match = True
+           if '#' + str(episode_nr) in episode['description'] or ' ' + str(episode_nr) in episode['description']:
+               match = True
+       if match:
+          value = episode
     return value
 
 def episode_value(feedId, episode, log_path):
     value = None
-    if episode == None:
-       value = podcast_value(feedId, log_path)
-    else:
-       value = episode['value']['destinations']
+    if episode != None:
+       value = nodesdata(episode)
        if value == None:
           value = podcast_value(feedId, log_path)
+    else:
+       value = podcast_value(feedId, log_path)
     return value
 
 def process_file(mode, data, episodes_nr, podcast_to_process):
@@ -66,7 +82,7 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
                  if pi_episode != None:
                     episode_in_index = True
 
-                 if episode_nr == 0 or episode_in_index:
+                 if int(episode_nr) == 0 or episode_in_index:
                     if valueblock != None:
                        logged_boostagrammessage = 0
                        print('Podcast: ' + pi_podcast["feed"]['title'])
@@ -75,43 +91,69 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
 
                        if mode == "BOOST":
                            print('Boostagram: ' + boostagrammessage)
+
                        if mode == "BOOST" or mode == "VALUE":
+                           split_total = 0
                            for recipient in valueblock:
-                               if recipient['type'] == 'node':
-                                  if logged_boostagrammessage == 0:
-                                     logged_boostagrammessage = 1
+                               split_total += int(recipient['split'])
+
+                           if split_total == 100:
+
+                              for recipient in valueblock:
+                                  if recipient['type'] == 'node':
+                                     if logged_boostagrammessage == 0:
+                                        logged_boostagrammessage = 1
+                                        if mode == "BOOST":
+                                           generalfunctions.log(log_path, 'Podcast: ' + pi_podcast["feed"]['title'], False, False)
+                                           if int(episode_nr) > 0:
+                                              generalfunctions.log(log_path, 'Episode: ' + pi_episode['title'], False, False)
+                                           generalfunctions.log(log_path, 'Timestamp: ' + str(timestamp), False, False)
+                                           generalfunctions.log(log_path, 'Sender: ' + sender, False, False)
+                                           generalfunctions.log(log_path, 'sats: ' + str(sats_total), False, False)
+                                           generalfunctions.log(log_path, 'Boostagram: ' + boostagrammessage, False, False)
+
                                      if mode == "BOOST":
-                                        generalfunctions.log(log_path, 'Podcast: ' + pi_podcast["feed"]['title'], False, False)
-                                        if int(episode_nr) > 0:
-                                           generalfunctions.log(log_path, 'Episode: ' + pi_episode['title'], False, False)
-                                        generalfunctions.log(log_path, 'Timestamp: ' + str(timestamp), False, False)
-                                        generalfunctions.log(log_path, 'Sender: ' + sender, False, False)
-                                        generalfunctions.log(log_path, 'sats: ' + str(sats_total), False, False)
-                                        generalfunctions.log(log_path, 'Boostagram: ' + boostagrammessage, False, False)
+                                        if os.path.exists(sendboostagramscript):
+                                           message = 'Boosted ' + recipient['name']
+                                           sats_recipient = int(int(sats_total) / 100 * int(recipient['split']))
+                                           if sats_recipient == 0:
+                                              message = message + '. Amount of sats is 0. No sats sent.'
+                                              generalfunctions.log(log_path, message, True, False)
+                                           else:
+                                              message = message + ' ' + str(sats_recipient) + ' sats.'
 
-                                  if mode == "BOOST":
-                                     message = 'Boosted ' + recipient['name']
-                                     sats_recipient = int(int(sats_total) / 100 * int(recipient['split']))
-                                     if sats_recipient == 0:
-                                        message = message + '. Amount of sats is 0. No sats sent.'
-                                     else:
-                                        message = message + ' ' + str(sats_recipient) + ' sats.'
+                                              command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + pi_podcast['feed']['title'] + '\"' + ' ' + '\"' + pi_episode['title'] + '\"' + ' ' + timestamp + ' ' + str(podcast_data["id"]) + ' ' + '\"' + podcast_data["feed"] + '\"' + ' ' + '\"' + recipient['name'] + '\"' + ' ' + recipient['address'] + ' ' + '\"' + boostagrammessage + '\"' + ' ' + '\"' + sender + '\"' + ' ' + str(sats_recipient)
+                                              subprocess.call(command, shell=True)
+                                              generalfunctions.log(log_path, message, False, False)
 
-                                     command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + pi_podcast['feed']['title'] + '\"' + ' ' + '\"' + pi_episode['title'] + '\"' + ' ' + timestamp + ' ' + str(podcast_data["id"]) + ' ' + '\"' + podcast_data["feed"] + '\"' + ' ' + '\"' + recipient['name'] + '\"' + ' ' + recipient['address'] + ' ' + '\"' + boostagrammessage + '\"' + ' ' + '\"' + sender + '\"' + ' ' + str(sats_recipient)
-                                     subprocess.call(command, shell=True)
-                                     print(message)
-                                     generalfunctions.log(log_path, message, False, False)
+                                           print(message)
+                                        else:
+                                           message = 'File \'' + sendboostagramscript + '\' does not exist'
+                                           print(message)
+                                           generalfunctions.log(log_path, message, True, False)
 
-                                  if mode == "VALUE":
-                                     print('Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%')
+                                     if mode == "VALUE":
+                                        print('Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%')
+                           else:
+                              message = 'Total split not equals 100% (' + str(split_total) + '%)'
+                              generalfunctions.log(log_path, message, True, False)
+                              print(message)
+                              message = 'No boostagram sent.'
+                              generalfunctions.log(log_path, message, True, False)
+                              print(message)
+                              for recipient in valueblock:
+                                  message = 'Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%'
+                                  generalfunctions.log(log_path, message, True, False)
+                                  print(message)
                     else:
                        message = 'Podcast: ' + pi_podcast["feed"]['title']
                        generalfunctions.log(log_path, message, False, False)
-                       print(message)
+
                        if int(episode_nr) > 0:
                           message = 'Episode: ' + pi_episode['title']
                           generalfunctions.log(log_path, message, False, False)
                           print(message)
+
                        message = 'No valueblock in index'
                        generalfunctions.log(log_path, message, False, False)
                        print(message)
@@ -119,7 +161,6 @@ def process_file(mode, data, episodes_nr, podcast_to_process):
                     if int(episode_nr) > 0:
                        message = 'Podcast: ' + pi_podcast["feed"]['title']
                        generalfunctions.log(log_path, message, True, False)
-                       print(message)
                        message = 'Episode ' + str(episode_nr) + ' not in index'
                        generalfunctions.log(log_path, message, True, False)
                        print(message)
@@ -140,6 +181,9 @@ try:
     unlocked = 1
 
     configuration.read()
+
+    podcastlist_file = configuration.config["file"]["podcastlist"]
+
     sendboostagramscript = configuration.config["file"]["sendboostagram"]
     boostagrammode = configuration.config["settings"]["mode"]
     timestamp = configuration.config["settings"]["timestamp"]
@@ -163,15 +207,20 @@ try:
     if (len(sys.argv) == 4 or len(sys.argv) == 8) and (mode == "VALUE" or mode == "BOOST"):
        configuration.read() 
        log_path = configuration.config["directory"]["log"]
-       podcastlist_file = configuration.config["file"]["podcastlist"]
 
        now = generalfunctions.now()
        dateString = generalfunctions.format_dateYYYMMDDHHMMSS(now)
 
        generalfunctions.create_directory(log_path)
        log_path = os.path.join(log_path, dateString+'.log')
-       data = generalfunctions.read_json(podcastlist_file, log_path)
-       process_file(mode, data, episode_nr, podcast_to_process)
+       if os.path.exists(podcastlist_file):
+          data = generalfunctions.read_json(podcastlist_file, log_path)
+          process_file(mode, data, episode_nr, podcast_to_process)
+       else:
+          message = 'Can\'t read podcastlist: ' + podcastlist_file
+          print(message)
+          generalfunctions.log(log_path, message, True, False)
+
     else:
         podcast_to_process = "--help"
 
@@ -180,6 +229,6 @@ try:
 
 except Exception as e:
     message = e
-    message = 'Function: ' + function.__name__ + ': ' + str(e)
+    message = str(e)
     generalfunctions.log(log_path, message, True, False)
     print(message)
