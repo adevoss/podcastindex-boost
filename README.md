@@ -40,9 +40,9 @@ Get files:
 - copy \*.sh, \*.py and \*.json to a directory of choice
 - copy LICENCE and README.md to the same directory of choice
 - sudo rm -rf /tmp/podcastindex-boost
-- sudo chown -Rv helipad:helipad <directory of choice>
-- sudo mkdir <log-directory> (see config.json)
-- sudo chown -Rv helipad:helipad <log-directory>
+- sudo chown -Rv helipad:helipad \<directory of choice\>
+- sudo mkdir \<log-directory\> (see config.json)
+- sudo chown -Rv admin:admin \<log-directory\>
 
 Configuration:
 - edit paths in configuration.py and config.json
