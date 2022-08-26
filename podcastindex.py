@@ -26,17 +26,6 @@ def calculate_sats_after_fees(sats_total, valueblock):
     return sats_after_fees
 
 def check_splits(valueblock):
-#                           else:
-#                              message = 'Total split not equals 100% (' + str(split_total) + '%)'
-#                              generalfunctions.log(log_path, message, True, False)
-#                              print(message)
-#                              message = 'No boostagram sent.'
-#                              generalfunctions.log(log_path, message, True, False)
-#                              print(message)
-#                              for recipient in valueblock:
-#                                  message = 'Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%'
-#                                  generalfunctions.log(log_path, message, True, False)
-#                                  print(message)
     passed = False
     if valueblock !=None:
        split_total = 0
@@ -170,18 +159,34 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                           message = message + ' ' + str(sats_recipient) + ' sats.'
                                           if 'fee' in recipient and recipient['fee']:
                                              message = message + ' (fee)'
-                                          generalfunctions.log(log_path, message, False, False)
-                                          print(message)
 
                                           command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + pi_podcast['feed']['title'] + '\"' + ' '
                                           if int(episode_nr) == 0:
                                              command += '\"No specific episode\"'
                                           else:
+                                             command += '\"'
                                              command += pi_episode['title']
+                                             command += '\"'
 
-                                          command += ' ' + timestamp + ' ' + str(podcast_data["id"]) + ' ' + '\"' + podcast_data["feed"] + '\"' + ' ' + '\"' + recipient['name'] + '\"' + ' ' + recipient['address'] + ' ' + '\"' + boostagrammessage + '\"' + ' ' + '\"' + sender + '\"' + ' ' + str(sats_recipient)
-                                          #subprocess.call(command, shell=True)
+                                          command += ' ' + timestamp + ' ' + str(podcast_data["id"]) + ' ' + '\"' + podcast_data["feed"] + '\"' + ' ' + '\"' + recipient['name'] + '\"' + ' ' + recipient['address']
 
+                                          custom = '0 0'
+                                          if 'customKey' in recipient and len(recipient['customKey']) > 0:
+                                             if 'customValue' in recipient and len(recipient['customValue']) > 0:
+                                                custom = recipient['customKey'] + ' ' + recipient['customValue']
+
+                                          command += ' ' + custom + ' ' + '\"' + boostagrammessage + '\"' + ' ' + '\"' + sender + '\"' + ' ' + str(sats_recipient)
+                                          #print(command)
+                                          boostagram_result=subprocess.run(command, shell=True).returncode
+
+                                          message += ' '
+                                          if boostagram_result == 0:
+                                             message += 'Successful'
+                                          else:
+                                             message += 'FAILED (lncli return code: ' + str(boostagram_result) + ')'
+
+                                          generalfunctions.log(log_path, message, False, False)
+                                          print(message)
                                     else:
                                        message = 'File \'' + sendboostagramscript + '\' does not exist'
                                        print(message)
