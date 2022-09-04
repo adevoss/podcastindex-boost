@@ -4,8 +4,9 @@ Send a boostagram to a podcasts using the Podcast Index (https://podcastindex.or
 To use you need a key. Please go to https://api.podcastindex.org/signup
 
 Example on Raspiblitz v1.8:
-sudo -u helipad python3 VALUE /path/to/boost.py 920666 90 1
-sudo -u helipad python3 BOOST /path/to/boost.py 920666 90 1 'Sender name' 1000 'Boostmessage'
+(as admin user)
+python3 VALUE /path/to/boost.py 920666 90 1
+python3 BOOST /path/to/boost.py 920666 90 1 'Sender name' 1000 'Boostmessage'
 
 Options:
 /path/to/boost.py VALUE|BOOST <podcastindex-id> <episode_nr> [<timestamp> <sender> <sats_total> <message>]
@@ -13,6 +14,9 @@ Use 0 as episode_nr to boost the podcast instead of a specific episode (i.e a li
 
 VALUE - Show valueblock of podcast episode
 BOOST - Send boostagram
+
+message - 'fromfile' - Read text from default file
+message - <filename> - If file exists read from file, else use default message
 
 configuration.json:
 - podcastindex: use your key and secret
