@@ -16,6 +16,7 @@
     },
     "file":{
         "podcastlist":"podcastlist.json",
+        "boostagrammessage":"/path/to/message.txt"
         "sendboostagram":"/path/to/boost.sh"
     }
 }

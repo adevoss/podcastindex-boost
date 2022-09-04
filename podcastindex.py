@@ -241,6 +241,14 @@ try:
        sender = sys.argv[5]
        sats_total = sys.argv[6]
        boostagrammessage = sys.argv[7]
+       if boostagrammessage == 'fromfile':
+           boostagrammessage = generalfunctions.read_file(configuration.config["file"]["boostagramfile"])
+       if os.path.exists(boostagrammessage):
+           boostagrammessage = generalfunctions.read_file(boostagrammessage)
+       else:
+           if boostagrammessage[:1] == '/':
+              boostagrammessage = configuration.config["settings"]["message"]
+              
     if len(sys.argv) == 4:
        mode = sys.argv[1]
        podcast_to_process = sys.argv[2]
