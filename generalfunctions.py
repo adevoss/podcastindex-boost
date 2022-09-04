@@ -47,6 +47,13 @@ def read_json(path, log_path):
 
     return json_text
 
+def read_file(path):
+    with open(path, "r") as infile:
+        text = infile.read()
+    infile.close()
+    text = text.strip('\n')
+    return text
+
 def now():
     date = datetime.now()
     return date
