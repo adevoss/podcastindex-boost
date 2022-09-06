@@ -32,7 +32,7 @@ def check_splits(valueblock):
        for recipient in valueblock:
            if 'fee' not in recipient or not recipient['fee']:
               split_total += int(recipient['split'])
-       if split_total == 100:
+       if split_total <= 100:
           passed = True
     return passed
 
@@ -120,12 +120,13 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                     generalfunctions.log(log_path, message, False, False)
                     print(message)
 
-                 message = 'Timestamp: ' + str(timestamp)
-                 generalfunctions.log(log_path, message, False, False)
-                 message = 'Sender: ' + sender
-                 generalfunctions.log(log_path, message, False, False)
-                 message = 'sats: ' + str(sats_total)
-                 generalfunctions.log(log_path, message, False, False)
+                 if mode == "BOOST":
+                    message = 'Timestamp: ' + str(timestamp)
+                    generalfunctions.log(log_path, message, False, False)
+                    message = 'Sender: ' + sender
+                    generalfunctions.log(log_path, message, False, False)
+                    message = 'sats: ' + str(sats_total)
+                    generalfunctions.log(log_path, message, False, False)
 
 
                  if int(episode_nr) == 0 or episode_in_index:
@@ -156,9 +157,10 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                           generalfunctions.log(log_path, message, True, False)
                                           print(message)
                                        else:
-                                          message = message + ' ' + str(sats_recipient) + ' sats.'
+                                          message = message + ' ' + str(sats_recipient) + ' sats'
                                           if 'fee' in recipient and recipient['fee']:
                                              message = message + ' (fee)'
+                                          message +=  '.'
 
                                           command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + pi_podcast['feed']['title'] + '\"' + ' '
                                           if int(episode_nr) == 0:
