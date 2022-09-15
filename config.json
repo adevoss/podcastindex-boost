@@ -4,19 +4,22 @@
         "key":"xxxxxxxxxxxxxxxxxxxxxxxxx",
         "secret":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
+    "app":{
+        "url":"http://api.noagendalowlands.com/api/1.0/"
+    },
     "directory":{
         "log":"/var/log/podcastindex"
     },
     "settings":{
         "mode":"TEST",
-        "timestamp":"1",
+        "timestamp":1,
         "message":"Boost!",
         "sender":"<name>",
-        "sats_total":"1000"
+        "sats_total":1000
     },
     "file":{
         "podcastlist":"podcastlist.json",
-        "boostagrammessage":"/path/to/message.txt"
+        "boostagrammessage":"/path/to/message.txt",
         "sendboostagram":"/path/to/boost.sh"
     }
 }

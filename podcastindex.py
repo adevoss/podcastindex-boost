@@ -8,18 +8,61 @@ import subprocess
 import configuration
 
 import PIfunctions
+import Appfunctions
 import configuration
 import generalfunctions
+
+def get_app_name(log_path):
+    App_url = configuration.config["app"]["url"]
+    url = App_url  + "appname"
+    result = Appfunctions.request(url, log_path)
+    if 'name' in result and type(result['name']) is str:
+       result = result['name']
+    else:
+       result = 'NodeBoost'
+    return result
+
+def get_app_split(log_path):
+    App_url = configuration.config["app"]["url"]
+    url = App_url  + "appsplit"
+    result = Appfunctions.request(url, log_path)
+    if 'split' in result and type(result['split']) is int:
+       result = result['split']
+    else:
+       result = None
+    return result
+
+def get_app_address(log_path):
+    App_url = configuration.config["app"]["url"]
+    url = App_url  + "appnodeaddress"
+    result = Appfunctions.request(url, log_path)
+    if 'address' in result and type(result['address']) is str:
+       result = result['address']
+    else:
+       result = None
+    return result
+
+def get_app_customKey(log_path):
+    key = '0'
+    return key
+
+def get_app_customValue(log_path):
+    value = '0'
+    return value
+
+def send_boostagram_command(sendboostagramscript, boostagrammode, unlocked, title, episode, timestamp, podcast_id, feed_url, name, address, customKey, customValue, message, sender, sats):
+    command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + title + '\"' + ' \"' + episode + '\"' + ' ' + str(timestamp) + ' ' + str(podcast_id) + ' ' + '\"' + feed_url + '\"' + ' ' + '\"' + str(name) + '\"' + ' ' + str(address) + ' ' + str(customKey) + ' ' + str(customValue) + ' ' + '\"' + message + '\"' + ' ' + '\"' + str(sender) + '\"' + ' ' + str(sats)
+    return command
 
 def podcastdata(feedId, log_path):
     PIurl = configuration.config["podcastindex"]["url"]
     url = PIurl  + "podcasts/byfeedid?id=" + str(feedId)
-    #generalfunctions.log(log_path, url, False, True)
     feed_result = PIfunctions.request(url, log_path)
     return feed_result
 
 def calculate_sats_after_fees(sats_total, valueblock):
     sats_after_fees = int(sats_total)
+    sats_after_fees -= int(int(sats_total) / 100 * int(app_split))
     for recipient in valueblock:
         if 'fee' in recipient and recipient['fee']:
            sats_after_fees -= int(int(sats_total) / 100 * int(recipient['split']))
@@ -140,6 +183,29 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                           if check_valueblock(valueblock) and check_splits(valueblock):
                              sats_after_fees = calculate_sats_after_fees(sats_total, valueblock)
 
+                             if int(episode_nr) == 0:
+                                episode_title = 'No specific episode'
+                             else:
+                                episode_title = pi_episode['title']
+
+                             message = 'App takes a ' + str(app_split) + '% fee'
+                             print(message)
+
+                             if mode == "BOOST":
+                                if app_split != None:
+                                   sats_app = int(int(sats_total) / 100 * int(app_split))
+                                   command = send_boostagram_command(sendboostagramscript, boostagrammode, unlocked, pi_podcast['feed']['title'], episode_title, timestamp, pi_podcast['feed']['id'], pi_podcast['feed']['url'], app_name, app_address, app_customKey, app_customValue, boostagrammessage, app_name, sats_app)
+                                   boostagram_result=subprocess.run(command, shell=True).returncode
+                                   message = 'Sent split to app developer. '
+                                   if boostagram_result == 0:
+                                      message += '(Successful)'
+                                      generalfunctions.log(log_path, message, False, False)
+                                   else:
+                                      message += '(FAILED)'
+                                      generalfunctions.log(log_path, message, True, False)
+                                else:
+                                   message = 'No API (Application fee). Server (application side) offline or no internet connection.'
+                                   generalfunctions.log(log_path, message, True, False)
 
                              for recipient in valueblock:
 
@@ -162,23 +228,14 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                              message = message + ' (fee)'
                                           message +=  '.'
 
-                                          command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + pi_podcast['feed']['title'] + '\"' + ' '
-                                          if int(episode_nr) == 0:
-                                             command += '\"No specific episode\"'
-                                          else:
-                                             command += '\"'
-                                             command += pi_episode['title']
-                                             command += '\"'
-
-                                          command += ' ' + timestamp + ' ' + str(podcast_data["id"]) + ' ' + '\"' + podcast_data["feed"] + '\"' + ' ' + '\"' + recipient['name'] + '\"' + ' ' + recipient['address']
-
-                                          custom = '0 0'
+                                          customKey = 0
+                                          customValue = 0
                                           if 'customKey' in recipient and len(recipient['customKey']) > 0:
                                              if 'customValue' in recipient and len(recipient['customValue']) > 0:
-                                                custom = recipient['customKey'] + ' ' + recipient['customValue']
+                                                customKey = recipient['customKey']
+                                                customValue = recipient['customValue']
 
-                                          command += ' ' + custom + ' ' + '\"' + boostagrammessage + '\"' + ' ' + '\"' + sender + '\"' + ' ' + str(sats_recipient)
-                                          #print(command)
+                                          command = send_boostagram_command(sendboostagramscript, boostagrammode, unlocked, pi_podcast['feed']['title'], episode_title, timestamp, pi_podcast['feed']['id'], pi_podcast['feed']['url'], recipient['name'], recipient['address'], customKey, customValue, boostagrammessage, sender, sats_recipient)
                                           boostagram_result=subprocess.run(command, shell=True).returncode
 
                                           message += ' '
@@ -265,6 +322,13 @@ try:
 
        generalfunctions.create_directory(log_path)
        log_path = os.path.join(log_path, dateString+'.log')
+
+       app_name = get_app_name(log_path)
+       app_split = get_app_split(log_path)
+       app_address = get_app_address(log_path)
+       app_customKey = get_app_customKey(log_path)
+       app_customValue = get_app_customValue(log_path)
+
        if os.path.exists(podcastlist_file):
           data = generalfunctions.read_json(podcastlist_file, log_path)
           process_file(mode, data, episode_nr, podcast_to_process)
