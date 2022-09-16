@@ -56,7 +56,8 @@ def request(url, log_path):
     except Exception as e:
         message = 'Podcast Index API call: ' + str(e)
         generalfunctions.log(log_path, message, True, False)
-        print(message)
+        message = 'URL: \'' + str(url) + '\''
+        generalfunctions.log(log_path, message, True, False)
 
     return result
 

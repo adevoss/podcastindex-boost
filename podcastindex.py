@@ -16,7 +16,7 @@ def get_app_name(log_path):
     App_url = configuration.config["app"]["url"]
     url = App_url  + "appname"
     result = Appfunctions.request(url, log_path)
-    if 'name' in result and type(result['name']) is str:
+    if result != None and 'name' in result and type(result['name']) is str:
        result = result['name']
     else:
        result = 'NodeBoost'
@@ -26,7 +26,7 @@ def get_app_split(log_path):
     App_url = configuration.config["app"]["url"]
     url = App_url  + "appsplit"
     result = Appfunctions.request(url, log_path)
-    if 'split' in result and type(result['split']) is int:
+    if result != None and 'split' in result and type(result['split']) is int:
        result = result['split']
     else:
        result = None
@@ -36,19 +36,31 @@ def get_app_address(log_path):
     App_url = configuration.config["app"]["url"]
     url = App_url  + "appnodeaddress"
     result = Appfunctions.request(url, log_path)
-    if 'address' in result and type(result['address']) is str:
+    if result != None and 'address' in result and type(result['address']) is str:
        result = result['address']
     else:
        result = None
     return result
 
 def get_app_customKey(log_path):
-    key = '0'
-    return key
+    App_url = configuration.config["app"]["url"]
+    url = App_url  + "appcustomkey"
+    result = Appfunctions.request(url, log_path)
+    if result != None and 'customkey' in result and type(result['customkey']) is int:
+       result = result['customkey']
+    else:
+       result = None
+    return result
 
 def get_app_customValue(log_path):
-    value = '0'
-    return value
+    App_url = configuration.config["app"]["url"]
+    url = App_url  + "appcustomvalue"
+    result = Appfunctions.request(url, log_path)
+    if result != None and 'customvalue' in result and type(result['customvalue']) is int:
+       result = result['customvalue']
+    else:
+       result = None
+    return result
 
 def send_boostagram_command(sendboostagramscript, boostagrammode, unlocked, title, episode, timestamp, podcast_id, feed_url, name, address, customKey, customValue, message, sender, sats):
     command = sendboostagramscript + ' ' + '\"' + str(boostagrammode) + '\"' + ' ' + str(unlocked) + ' ' + '\"' + title + '\"' + ' \"' + episode + '\"' + ' ' + str(timestamp) + ' ' + str(podcast_id) + ' ' + '\"' + feed_url + '\"' + ' ' + '\"' + str(name) + '\"' + ' ' + str(address) + ' ' + str(customKey) + ' ' + str(customValue) + ' ' + '\"' + message + '\"' + ' ' + '\"' + str(sender) + '\"' + ' ' + str(sats)
@@ -62,7 +74,8 @@ def podcastdata(feedId, log_path):
 
 def calculate_sats_after_fees(sats_total, valueblock):
     sats_after_fees = int(sats_total)
-    sats_after_fees -= int(int(sats_total) / 100 * int(app_split))
+    if app_split != None:
+       sats_after_fees -= int(int(sats_total) / 100 * int(app_split))
     for recipient in valueblock:
         if 'fee' in recipient and recipient['fee']:
            sats_after_fees -= int(int(sats_total) / 100 * int(recipient['split']))
@@ -188,7 +201,10 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                              else:
                                 episode_title = pi_episode['title']
 
-                             message = 'App takes a ' + str(app_split) + '% fee'
+                             if app_split == None:
+                                message = 'Fee for app can\'t be determined. Most common cause is the app server is offline.'
+                             else:
+                                message = 'App takes a ' + str(app_split) + '% fee'
                              print(message)
 
                              if mode == "BOOST":
