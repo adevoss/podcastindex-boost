@@ -23,13 +23,17 @@ def get_app_name(log_path):
     return result
 
 def get_app_split(log_path):
-    App_url = configuration.config["app"]["url"]
-    url = App_url  + "appsplit"
-    result = Appfunctions.request(url, log_path)
-    if result != None and 'split' in result and type(result['split']) is int:
-       result = result['split']
-    else:
-       result = None
+    result = None
+    take_split = configuration.config["app"]["insplit"]
+    if bool(take_split):
+       app_url = configuration.config["app"]["url"]
+       url = app_url  + "appsplit"
+       result = Appfunctions.request(url, log_path)
+       if result == None:
+          result = 1
+       else:
+          if 'split' in result and type(result['split']) is int:
+             result = result['split']
     return result
 
 def get_app_address(log_path):
@@ -202,7 +206,7 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                 episode_title = pi_episode['title']
 
                              if app_split == None:
-                                message = 'Fee for app can\'t be determined. Most common cause is the app server is offline.'
+                                message = 'Fee for app can\'t be determined.'
                              else:
                                 message = 'App takes a ' + str(app_split) + '% fee'
                              print(message)
@@ -340,6 +344,7 @@ try:
        log_path = os.path.join(log_path, dateString+'.log')
 
        app_name = get_app_name(log_path)
+       print('Fetching app split...')
        app_split = get_app_split(log_path)
        app_address = get_app_address(log_path)
        app_customKey = get_app_customKey(log_path)
