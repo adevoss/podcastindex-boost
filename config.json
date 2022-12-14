@@ -5,6 +5,7 @@
         "secret":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
     "app":{
+	"insplit":1,
         "url":"http://api.noagendalowlands.com/api/1.0/"
     },
     "directory":{
