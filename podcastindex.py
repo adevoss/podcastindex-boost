@@ -23,18 +23,16 @@ def get_app_name(log_path):
     return result
 
 def get_app_split(log_path):
-    result = None
+    split = 1
     take_split = configuration.config["app"]["insplit"]
     if bool(take_split):
        app_url = configuration.config["app"]["url"]
        url = app_url  + "appsplit"
        result = Appfunctions.request(url, log_path)
-       if result == None:
-          result = 1
-       else:
+       if result != None:
           if 'split' in result and type(result['split']) is int:
              result = result['split']
-    return result
+    return split
 
 def get_app_address(log_path):
     App_url = configuration.config["app"]["url"]
