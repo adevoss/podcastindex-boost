@@ -83,16 +83,13 @@ def calculate_sats_after_fees(sats_total, valueblock):
            sats_after_fees -= int(int(sats_total) / 100 * int(recipient['split']))
     return sats_after_fees
 
-def check_splits(valueblock):
-    passed = False
+def calculate_split_total(valueblock):
+    split_total = 0
     if valueblock !=None:
-       split_total = 0
        for recipient in valueblock:
            if 'fee' not in recipient or not recipient['fee']:
               split_total += int(recipient['split'])
-       if split_total <= 100:
-          passed = True
-    return passed
+    return split_total
 
 def check_valueblock(valueblock):
     passed = False
@@ -195,7 +192,8 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                           print(message)
 
                        if mode == "BOOST" or mode == "VALUE":
-                          if check_valueblock(valueblock) and check_splits(valueblock):
+                          if check_valueblock(valueblock):
+                             split_total = calculate_split_total(valueblock)
                              sats_after_fees = calculate_sats_after_fees(sats_total, valueblock)
 
                              if int(episode_nr) == 0:
@@ -206,7 +204,10 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                              if app_split == None:
                                 message = 'Fee for app can\'t be determined.'
                              else:
-                                message = 'App takes a ' + str(app_split) + '% fee'
+                                message = 'App takes ' + str(app_split) + '% fee'
+                             print(message)
+
+                             message = 'Total split is: ' + str(split_total)
                              print(message)
 
                              if mode == "BOOST":
@@ -234,7 +235,7 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                        if 'fee' in recipient and recipient['fee']:
                                           sats_recipient = int(int(sats_total) / 100 * int(recipient['split']))
                                        else:
-                                          sats_recipient = int(int(sats_after_fees) / 100 * int(recipient['split']))
+                                          sats_recipient = int(int(recipient['split']) / int(split_total) * int(sats_after_fees))
 
                                        if sats_recipient == 0:
                                           message = message + '. Amount of sats is 0. No sats sent.'
@@ -270,9 +271,9 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                                        generalfunctions.log(log_path, message, True, False)
 
                                  if mode == "VALUE":
-                                    message = 'Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split']) + '%'
+                                    message = 'Recipient: ' + recipient['name'] + ' Split: ' + str(recipient['split'])
                                     if 'fee' in recipient and recipient['fee']:
-                                       message += ' (fee)'
+                                       message += '% (fee)'
                                     print(message)
                     else:
                        message = 'No valueblock in index'
