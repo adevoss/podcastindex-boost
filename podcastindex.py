@@ -13,6 +13,7 @@ import configuration
 import generalfunctions
 
 def get_app_name(log_path):
+    print('Fetching app name...')
     App_url = configuration.config["app"]["url"]
     url = App_url  + "appname"
     result = Appfunctions.request(url, log_path)
@@ -23,6 +24,7 @@ def get_app_name(log_path):
     return result
 
 def get_app_split(log_path):
+    print('Fetching app split...')
     split = 1
     take_split = configuration.config["app"]["insplit"]
     if bool(take_split):
@@ -35,6 +37,7 @@ def get_app_split(log_path):
     return split
 
 def get_app_address(log_path):
+    print('Fetching app address...')
     App_url = configuration.config["app"]["url"]
     url = App_url  + "appnodeaddress"
     result = Appfunctions.request(url, log_path)
@@ -190,6 +193,9 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                           message = 'Boostagram: ' + boostagrammessage
                           generalfunctions.log(log_path, message, False, False)
                           print(message)
+                          message = 'Sender: ' + sender
+                          generalfunctions.log(log_path, message, False, False)
+                          print(message)
 
                        if mode == "BOOST" or mode == "VALUE":
                           if check_valueblock(valueblock):
@@ -204,7 +210,7 @@ def process_file(mode, data, episode_nr, podcast_to_process):
                              if app_split == None:
                                 message = 'Fee for app can\'t be determined.'
                              else:
-                                message = 'App takes ' + str(app_split) + '% fee'
+                                message = 'App takes ' + str(app_split) + ' part(s) of split'
                              print(message)
 
                              message = 'Total split is: ' + str(split_total)
@@ -343,7 +349,6 @@ try:
        log_path = os.path.join(log_path, dateString+'.log')
 
        app_name = get_app_name(log_path)
-       print('Fetching app split...')
        app_split = get_app_split(log_path)
        app_address = get_app_address(log_path)
        app_customKey = get_app_customKey(log_path)
