@@ -4,9 +4,19 @@
         "key":"xxxxxxxxxxxxxxxxxxxxxxxxx",
         "secret":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
-    "app":{
+    "appname":{
+        "url":"http://api.noagendalowlands.com/api/1.0/appname"
+    },
+    "appnodeaddress":{
+        "url":"http://api.noagendalowlands.com/api/1.0/appnodeaddress"
+    },
+    "pisplit":{
 	"insplit":1,
-        "url":"http://api.noagendalowlands.com/api/1.0/"
+        "url":"http://api.noagendalowlands.com/api/1.0/pisplit"
+    },
+    "appsplit":{
+	"insplit":1,
+        "url":"http://api.noagendalowlands.com/api/1.0/appsplit"
     },
     "directory":{
         "log":"/var/log/podcastindex"
