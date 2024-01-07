@@ -15,7 +15,6 @@ import generalfunctions
 def get_app_name(log_path):
     print('Fetching app name...')
     App_url = configuration.config["app"]["url"]
-    url = App_url  + "appname"
     result = Appfunctions.request(url, log_path)
     if result != None and 'name' in result and type(result['name']) is str:
        result = result['name']
@@ -29,7 +28,18 @@ def get_app_split(log_path):
     take_split = configuration.config["app"]["insplit"]
     if bool(take_split):
        app_url = configuration.config["app"]["url"]
-       url = app_url  + "appsplit"
+       result = Appfunctions.request(url, log_path)
+       if result != None:
+          if 'split' in result and type(result['split']) is int:
+             result = result['split']
+    return split
+
+def get_pi_split(log_path):
+    print('Fetching PodcastIndex split...')
+    split = 1
+    take_split = configuration.config["pi"]["insplit"]
+    if bool(take_split):
+       pi_url = configuration.config["pi"]["url"]
        result = Appfunctions.request(url, log_path)
        if result != None:
           if 'split' in result and type(result['split']) is int:
@@ -79,6 +89,8 @@ def podcastdata(feedId, log_path):
 
 def calculate_sats_after_fees(sats_total, valueblock):
     sats_after_fees = int(sats_total)
+    if pi_split != None:
+       sats_after_fees -= int(int(sats_total) / 100 * int(pi_split))
     if app_split != None:
        sats_after_fees -= int(int(sats_total) / 100 * int(app_split))
     for recipient in valueblock:
@@ -350,6 +362,7 @@ try:
 
        app_name = get_app_name(log_path)
        app_split = get_app_split(log_path)
+       pi_split = get_pi_split(log_path)
        app_address = get_app_address(log_path)
        app_customKey = get_app_customKey(log_path)
        app_customValue = get_app_customValue(log_path)
