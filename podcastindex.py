@@ -14,7 +14,7 @@ import generalfunctions
 
 def get_app_name(log_path):
     print('Fetching app name...')
-    App_url = configuration.config["app"]["url"]
+    App_url = configuration.config["appname"]["url"]
     result = Appfunctions.request(url, log_path)
     if result != None and 'name' in result and type(result['name']) is str:
        result = result['name']
@@ -25,9 +25,9 @@ def get_app_name(log_path):
 def get_app_split(log_path):
     print('Fetching app split...')
     split = 1
-    take_split = configuration.config["app"]["insplit"]
+    take_split = configuration.config["appsplit"]["insplit"]
     if bool(take_split):
-       app_url = configuration.config["app"]["url"]
+       app_url = configuration.config["appsplit"]["url"]
        result = Appfunctions.request(url, log_path)
        if result != None:
           if 'split' in result and type(result['split']) is int:
@@ -37,19 +37,18 @@ def get_app_split(log_path):
 def get_pi_split(log_path):
     print('Fetching PodcastIndex split...')
     split = 1
-    take_split = configuration.config["pi"]["insplit"]
+    take_split = configuration.config["pisplit"]["insplit"]
     if bool(take_split):
-       pi_url = configuration.config["pi"]["url"]
+       pi_url = configuration.config["pisplit"]["url"]
        result = Appfunctions.request(url, log_path)
        if result != None:
           if 'split' in result and type(result['split']) is int:
              result = result['split']
     return split
 
-def get_app_address(log_path):
+def get_app_nodeaddress(log_path):
     print('Fetching app address...')
-    App_url = configuration.config["app"]["url"]
-    url = App_url  + "appnodeaddress"
+    App_url = configuration.config["appnodeaddress"]["url"]
     result = Appfunctions.request(url, log_path)
     if result != None and 'address' in result and type(result['address']) is str:
        result = result['address']
@@ -363,7 +362,7 @@ try:
        app_name = get_app_name(log_path)
        app_split = get_app_split(log_path)
        pi_split = get_pi_split(log_path)
-       app_address = get_app_address(log_path)
+       app_address = get_app_nodeaddress(log_path)
        app_customKey = get_app_customKey(log_path)
        app_customValue = get_app_customValue(log_path)
 

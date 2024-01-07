@@ -5,8 +5,10 @@
         "secret":"xxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
     "appname":{
-	"insplit":1,
         "url":"http://api.noagendalowlands.com/api/1.0/appname"
+    },
+    "appnodeaddress":{
+        "url":"http://api.noagendalowlands.com/api/1.0/appnodeaddress"
     },
     "pisplit":{
 	"insplit":1,
